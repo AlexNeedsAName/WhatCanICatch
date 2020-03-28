@@ -1,0 +1,166 @@
+body {
+    padding-top: 4.5rem;
+}
+
+.navbar-brand.navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    font-size: xx-large;
+}
+
+.navbar {
+    padding: 1rem 1rem;
+}
+
+.col-md-4 {
+    background-color: rgba(86, 61, 124, .15);
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    background-color: #6c757d;
+}
+
+.nav-pills .nav-link {
+    color: #ffffff;
+    margin: 0 0.25rem;
+}
+
+/*.lines ul li {*/
+/*border-right: 1px solid #6c757d;*/
+/*}*/
+
+/*.lines ul li:last-of-type {*/
+/*border-right: none;*/
+/*}*/
+
+/*.lines ul ul li {*/
+/*border-right: none;*/
+/*}*/
+.seperator {
+    border-right: 1px solid #6c757d;
+    margin: 0.25rem 0;
+    width: 0px;
+}
+
+main {
+    margin-top: 1rem;
+}
+
+table {
+    width: 100%;
+}
+
+.month {
+    text-align: center;
+    margin: .25rem;
+    padding: .25rem;
+    color: #d3d27e;
+    background-color: #fff4c5;
+    border-radius: .5rem;
+    border: black solid 1px;
+    width: 25%;
+}
+
+.month.active {
+    background-color: #c7bd2e;
+    color: #000000;
+}
+
+.hour-bar .hour:last-of-type {
+    border-right: none;
+}
+
+.hour {
+    height: 2rem;
+    width: 5px;
+    /*border-right: black solid 1px;*/
+    padding: 0;
+    white-space: nowrap;
+}
+
+.hour.active {
+    background-color: #c7bd2e;
+}
+
+.hour-bar {
+    padding: 0;
+    margin: 0;
+    min-width: 200px;
+    width: 100%;
+    border-bottom: black 2px solid;
+    background-color: #fff4c5;
+}
+
+.hour-labels {
+    padding: 0;
+    margin: 0;
+    min-width: 200px;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.hour-label {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.AM-PM {
+    width: 50%;
+}
+
+.hour-time {
+    width: 25%;
+}
+
+.tick {
+    width: 2px;
+    background-color: black;
+}
+
+.tick-container {
+    padding: 0;
+    width: 2px;
+    /*background-color: CYAN;*/
+}
+
+.tick-container.active {
+    background-color: #c7bd2e;
+}
+
+.tick.full {
+    margin: 0 0;
+    height: 2rem
+}
+
+.tick.half {
+    margin: 0.5rem 0;
+    height: 1rem;
+}
+
+.tick.small {
+    margin: 0.75rem 0;
+    height: 0.5rem;
+}
+
+.months {
+    width: 100%;
+    display: inline-flex;
+}
+
+table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
+    content: " \25B4\25BE"
+}
+
+td#caught {
+    min-width: 6.75rem;
+}
+
+td#bells {
+    min-width: 5rem;
+}
+
+td#location {
+    min-width: 7rem;
+}

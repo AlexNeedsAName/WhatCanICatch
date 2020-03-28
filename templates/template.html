@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>What Can I Catch?</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    {# Universal Styles here #}
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=8">
+    <script id="data" type="text/json" src="/fish.json"></script>
+    <script src="/static/js/sorttable.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand navbar-center" href="#">What Can I Catch?</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="navbar-collapse collapse" id="navbarsExampleDefault">
+        <ul class="nav navbar-nav ml-auto">
+            <li class="nav-item active">
+                {#                <a class="nav-link" href="#">Login</a>#}
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a class="nav-link" href="{% url 'social:begin' 'google-oauth2' %}">
+                        Login
+                    </a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</nav>
+<nav class="second-nav">
+    <div class="lines">
+        <ul class="nav nav-pills nav-fill red bg-dark" role="tablist">
+            <li class="nav-item">
+                <a id="a_now" class="nav-link active" data-toggle="pill" href="#now" onclick="updateFilterType('now')">
+                    Right Now?</a>
+            </li>
+            <li class="seperator"></li>
+            <li class="nav-item">
+                <a id="a_month" class="nav-link" data-toggle="pill" href="#month" onclick="updateFilterType('month')">
+                    This Month?</a>
+            </li>
+            <li class="seperator"></li>
+            <li class="nav-item">
+                <a id="a_only" class="nav-link" data-toggle="pill" href="#only" onclick="updateFilterType('only')">
+                    Leaving Soon?</a>
+            </li>
+            <li class="seperator"></li>
+            <li class="nav-item">
+                <a id="a_all" class="nav-link" data-toggle="pill" href="#all"
+                   onclick="updateFilterType('all')">Ever?</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main role="main" class="container">
+    <div class="table-responsive">
+        <table id="tbl" class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th>
+                    Caught?
+
+                </th>
+                <th>
+                    Fish
+                </th>
+                <th>
+                    Size
+                </th>
+                <th>
+                    Location
+                </th>
+                <th>
+                    Bells
+                </th>
+                <th class="sorttable_nosort">
+                    Months
+                </th>
+                <th class="sorttable_nosort">
+                    Hours
+                </th>
+            </tr>
+            </thead>
+            <tbody id="table">
+
+            </tbody>
+        </table>
+    </div>
+</main><!-- /.container -->
+
+<script type="text/javascript">
+    var xmlhttp = new XMLHttpRequest();
+    let table = document.getElementById("table");
+    var data;
+
+    xmlhttp.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            data = JSON.parse(this.responseText);
+            console.log("data:");
+            console.log(data);
+            data.forEach(addRow);
+            sorttable.makeSortable(document.getElementById("tbl"));
+            filter();
+        }
+    };
+    xmlhttp.open("GET", "/fish.json", true);
+    xmlhttp.send();
+
+    months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+
+    ampm_label = document.createElement("div");
+    ampm_label.classList.add("hour-labels");
+    am = document.createElement("div");
+    am.classList.add("hour-label");
+    am.classList.add("AM-PM");
+    am.innerText = "AM";
+    pm = am.cloneNode(true);
+    pm.innerText = "PM";
+    ampm_label.appendChild(am);
+    ampm_label.appendChild(pm);
+
+    hour_label = document.createElement("div");
+    hour_label.classList.add("hour-labels");
+    hour = document.createElement("div");
+    hour.classList.add("hour-label");
+    hour.classList.add("hour-time");
+    hour_12 = hour.cloneNode(true);
+    hour_12.textContent = "12";
+    hour.textContent = "6";
+    hour_label.appendChild(hour_12);
+    hour_label.appendChild(hour);
+    hour_label.appendChild(hour_12.cloneNode(true));
+    hour_label.appendChild(hour.cloneNode(true));
+
+    var send_changes = true;
+
+    function addRow(item, index) {
+        table.getElementsByTagName("tbody")
+        var tableRow = table.insertRow();
+        var caught = tableRow.insertCell();
+        tableRow.insertCell().innerHTML = item["name"];
+        tableRow.insertCell().innerHTML = item["size"];
+        var location = tableRow.insertCell();
+        var bells = tableRow.insertCell();
+        var month_cell = tableRow.insertCell();
+        var hours_cell = tableRow.insertCell();
+
+        // Caught
+        var checkbox = document.createElement("input");
+        checkbox.checked = item["caught"];
+        checkbox.name = item["name"];
+        checkbox.onchange = function () {
+            caught.setAttribute("sorttable_customkey", this.checked ? 1 : 0);
+            if (send_changes) {
+                {% if user.is_authenticated %}
+                    var xmlhttp = new XMLHttpRequest();
+                    xmlhttp.onreadystatechange = function () {
+                        // Shouldn't be possible, this code is only here if the user is authenticated, but just in case.
+                        if (this.readyState === 4 && this.status === 403) {
+                            alert("Warning: You aren't logged in anymore. Caught critters won't be saved. Login to save caught critters.");
+                            send_changes = false;
+                        }
+                    };
+                    xmlhttp.open("GET", "/catch?name=" + this.name + "&caught=" + this.checked, true);
+                    xmlhttp.send();
+                {% else %}
+                    alert("Warning: You aren't logged in. Caught critters won't be saved. Login to save caught critters.");
+                    send_changes = false;
+                {% endif %}
+            }
+        };
+        checkbox.type = "checkbox"
+        caught.appendChild(checkbox);
+        caught.classList.add("text-center");
+        caught.id = "caught";
+        caught.setAttribute("sorttable_customkey", item["caught"] ? 1 : 0);
+
+        // Bells
+        bells.innerHTML = item["price"];
+        bells.id = "bells";
+
+        // Location
+        location.innerHTML = item["location"];
+        location.id = "location";
+
+        // Months
+        var value = document.createElement("input");
+        value.type = "number";
+        value.name = "value";
+        value.style.display = "None";
+        value.value = item["months"];
+        month_cell.appendChild(value);
+
+        for (var i = 0; i < 3; i++) {
+            var row = document.createElement("div");
+            month_cell.appendChild(row);
+            row.classList.add("months");
+            for (var j = 0; j < 4; j++) {
+                var month = document.createElement("div");
+                row.appendChild(month);
+                month.className = "month";
+                if (item["months"] & (1 << (4 * i + j))) {
+                    month.className += " active";
+                }
+                month.textContent = months[4 * i + j];
+            }
+        }
+
+        // Hours
+        value = document.createElement("input");
+        value.type = "number";
+        value.name = "value";
+        value.style.display = "None";
+        value.value = item["times"];
+        hours_cell.appendChild(value);
+
+        var bar = document.createElement("div");
+        hours_cell.appendChild(ampm_label.cloneNode(true));
+        hours_cell.appendChild(hour_label.cloneNode(true));
+        hours_cell.appendChild(bar);
+        bar.className = "row hour-bar";
+
+        for (var i = 0; i < 24; i++) {
+            var tick_container = document.createElement("span");
+            tick_container.classList.add("tick-container");
+            var tick = document.createElement("div");
+            bar.appendChild(tick_container);
+            tick_container.appendChild(tick);
+            if (i % 6 === 0) {
+                tick.className = "tick full";
+            } else if (i % 3 === 0) {
+                tick.className = "tick half";
+            } else {
+                tick.className = "tick small";
+            }
+            var segment = document.createElement("div");
+            bar.appendChild(segment);
+            segment.className = "col hour";
+            if (item["times"] & (1 << i)) {
+                segment.classList.add("active");
+                if (item["times"] & (1 << (i - 1))) {
+                    tick_container.classList.add("active");
+                }
+            }
+
+        }
+        var tick = document.createElement("div");
+        bar.appendChild(tick);
+        tick.className = "tick full";
+    }
+
+    var mode = window.location.hash.substr(1);
+    if (mode === "") {
+        mode = "now"
+    } else {
+        document.getElementById("a_now").classList.remove("active");
+        document.getElementById("a_" + mode).classList.add("active");
+    }
+
+    var southern = false;
+
+    function filter() {
+        var table = document.getElementById("table");
+        var tr = table.getElementsByTagName("tr");
+        let now = new Date();
+        let cur_month = (now.getMonth() + (southern ? 6 : 0)) % 12;
+        let cur_hour = now.getHours();
+
+        switch (mode) {
+            case "now":
+                for (var i = 0; i < tr.length; i++) {
+                    var show;
+                    var months = tr[i].getElementsByTagName("td")[5];
+                    var hours = tr[i].getElementsByTagName("td")[6];
+                    if (months) {
+                        show = (months.getElementsByTagName("input")[0].value & (1 << cur_month));
+                    }
+                    if (hours && show) {
+                        show = show && (hours.getElementsByTagName("input")[0].value & (1 << cur_hour));
+                    }
+                    tr[i].style.display = show ? "" : "None";
+                }
+                break;
+            case "month":
+                for (var i = 0; i < tr.length; i++) {
+                    var show;
+                    var months = tr[i].getElementsByTagName("td")[5];
+                    if (months) {
+                        show = (months.getElementsByTagName("input")[0].value & (1 << cur_month));
+                    }
+                    tr[i].style.display = show ? "" : "None";
+                }
+                break;
+            case "only":
+                for (var i = 0; i < tr.length; i++) {
+                    var show;
+                    var months = tr[i].getElementsByTagName("td")[5];
+                    if (months) {
+                        show = (months.getElementsByTagName("input")[0].value & (1 << cur_month));
+                        show = show && !(months.getElementsByTagName("input")[0].value & (1 << ((cur_month + 1) % 12)))
+                    }
+                    tr[i].style.display = show ? "" : "None";
+                }
+                break;
+            default:
+                for (var i = 0; i < tr.length; i++) {
+                    tr[i].style.display = "";
+                }
+        }
+    }
+
+    function updateFilterType(newMode) {
+        if (mode !== newMode) {
+            console.log("changing mode from " + mode + " to " + newMode);
+            mode = newMode;
+            filter();
+        }
+    }
+
+</script>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+</html>

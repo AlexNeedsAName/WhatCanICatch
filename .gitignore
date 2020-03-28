@@ -1,0 +1,12 @@
+__pycache__
+.idea
+.DS_Store
+.env
+venv/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+Fishing - Data.csv
+db.sqlite3
