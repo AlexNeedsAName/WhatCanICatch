@@ -146,6 +146,13 @@ table {
 
 .months {
     width: 100%;
+}
+
+.months.southern {
+    display: None;
+}
+
+.months.northern {
     display: inline-flex;
 }
 

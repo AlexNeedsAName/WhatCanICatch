@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     {# Universal Styles here #}
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=8">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=9">
     <script id="data" type="text/json" src="/fish.json"></script>
     <script src="/static/js/sorttable.js"></script>
 </head>
@@ -47,7 +47,8 @@
             </li>
             <li class="seperator"></li>
             <li class="nav-item">
-                <a id="a_only" class="nav-link" data-toggle="pill" href="#only" onclick="updateFilterType('only')">
+                <a id="a_only" class="nav-link" data-toggle="pill" href="#leaving"
+                   onclick="updateFilterType('leaving')">
                     Leaving Soon?</a>
             </li>
             <li class="seperator"></li>
@@ -60,13 +61,26 @@
 </nav>
 
 <main role="main" class="container">
+    <div class="row">
+        <div class="col">Hemisphere:</div>
+        <div class="col custom-control custom-radio custom-control-inline">
+            <input type="radio" id="northernRadio" name="customRadioInline1" class="custom-control-input"
+                   onclick="setNorthern();" checked>
+            <label class="custom-control-label" for="northernRadio">Northern</label>
+        </div>
+        <div class="col custom-control custom-radio custom-control-inline">
+            <input type="radio" id="southernRadio" name="customRadioInline1" class="custom-control-input"
+                   onclick="setSouthern();">
+            <label class="custom-control-label" for="southernRadio">Southern</label>
+        </div>
+    </div>
+    <br>
     <div class="table-responsive">
         <table id="tbl" class="table table-bordered table-hover">
             <thead>
             <tr>
                 <th>
                     Caught?
-
                 </th>
                 <th>
                     Fish
@@ -198,15 +212,34 @@
         value.value = item["months"];
         month_cell.appendChild(value);
 
+        // Northern
         for (var i = 0; i < 3; i++) {
             var row = document.createElement("div");
             month_cell.appendChild(row);
             row.classList.add("months");
+            row.classList.add("northern");
             for (var j = 0; j < 4; j++) {
                 var month = document.createElement("div");
                 row.appendChild(month);
                 month.className = "month";
                 if (item["months"] & (1 << (4 * i + j))) {
+                    month.className += " active";
+                }
+                month.textContent = months[4 * i + j];
+            }
+        }
+        //Southern
+        for (var i = 0; i < 3; i++) {
+            var row = document.createElement("div");
+            month_cell.appendChild(row);
+            row.classList.add("months");
+            row.classList.add("southern");
+            for (var j = 0; j < 4; j++) {
+                var month = document.createElement("div");
+                row.appendChild(month);
+                month.className = "month";
+                let m = (4 * i + j + 6) % 12;
+                if (item["months"] & (1 << m)) {
                     month.className += " active";
                 }
                 month.textContent = months[4 * i + j];
@@ -298,7 +331,7 @@
                     tr[i].style.display = show ? "" : "None";
                 }
                 break;
-            case "only":
+            case "leaving":
                 for (var i = 0; i < tr.length; i++) {
                     var show;
                     var months = tr[i].getElementsByTagName("td")[5];
@@ -320,6 +353,24 @@
         if (mode !== newMode) {
             console.log("changing mode from " + mode + " to " + newMode);
             mode = newMode;
+            filter();
+        }
+    }
+
+    function setNorthern() {
+        if (southern) {
+            southern = false;
+            $('.southern').css('display', 'None');
+            $('.northern').css('display', 'inline-flex');
+            filter();
+        }
+    }
+
+    function setSouthern() {
+        if (!southern) {
+            southern = true;
+            $('.northern').css('display', 'None');
+            $('.southern').css('display', 'inline-flex');
             filter();
         }
     }
