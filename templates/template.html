@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     {# Universal Styles here #}
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=9">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=10">
     <script id="data" type="text/json" src="/fish.json"></script>
     <script src="/static/js/sorttable.js"></script>
 </head>
@@ -60,17 +60,17 @@
     </div>
 </nav>
 
-<main role="main" class="container">
+<main role="main" class="container-fluid">
     <div class="row">
         <div class="col">Hemisphere:</div>
         <div class="col custom-control custom-radio custom-control-inline">
             <input type="radio" id="northernRadio" name="customRadioInline1" class="custom-control-input"
-                   onclick="setNorthern();" checked>
+                   onclick="setNorthern();" {{ northern }}>
             <label class="custom-control-label" for="northernRadio">Northern</label>
         </div>
         <div class="col custom-control custom-radio custom-control-inline">
             <input type="radio" id="southernRadio" name="customRadioInline1" class="custom-control-input"
-                   onclick="setSouthern();">
+                   onclick="setSouthern();" {{ southern }}>
             <label class="custom-control-label" for="southernRadio">Southern</label>
         </div>
     </div>
@@ -128,7 +128,9 @@
     xmlhttp.send();
 
     months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+    sizes = ["Tiny", "Small", "Long & Thin", "Medium", "Fin", "Large", "Very Large", "Huge", "Huge with Fin"];
 
+    // Setup reused Hours Elements
     ampm_label = document.createElement("div");
     ampm_label.classList.add("hour-labels");
     am = document.createElement("div");
@@ -160,7 +162,7 @@
         var tableRow = table.insertRow();
         var caught = tableRow.insertCell();
         tableRow.insertCell().innerHTML = item["name"];
-        tableRow.insertCell().innerHTML = item["size"];
+        var size = tableRow.insertCell();
         var location = tableRow.insertCell();
         var bells = tableRow.insertCell();
         var month_cell = tableRow.insertCell();
@@ -171,7 +173,10 @@
         checkbox.checked = item["caught"];
         checkbox.name = item["name"];
         checkbox.onchange = function () {
-            caught.setAttribute("sorttable_customkey", this.checked ? 1 : 0);
+            //TODO: Somehow make this actually change the sorting
+            //      It seemes like it only changes on table init.
+            this.parentNode.setAttribute("sorttable_customkey", this.checked ? 1 : 0);
+            console.log(this.checked);
             if (send_changes) {
                 {% if user.is_authenticated %}
                     var xmlhttp = new XMLHttpRequest();
@@ -190,11 +195,14 @@
                 {% endif %}
             }
         };
-        checkbox.type = "checkbox"
+        checkbox.type = "checkbox";
         caught.appendChild(checkbox);
         caught.classList.add("text-center");
         caught.id = "caught";
         caught.setAttribute("sorttable_customkey", item["caught"] ? 1 : 0);
+
+        size.innerHTML = item["size"];
+        size.setAttribute("sorttable_customkey", sizes.indexOf(item["size"]));
 
         // Bells
         bells.innerHTML = item["price"];
@@ -212,10 +220,14 @@
         value.value = item["months"];
         month_cell.appendChild(value);
 
+        var month_box = document.createElement("div");
+        month_cell.appendChild(month_box);
+        month_box.classList.add("month-box");
+
         // Northern
         for (var i = 0; i < 3; i++) {
             var row = document.createElement("div");
-            month_cell.appendChild(row);
+            month_box.appendChild(row);
             row.classList.add("months");
             row.classList.add("northern");
             for (var j = 0; j < 4; j++) {
@@ -231,7 +243,7 @@
         //Southern
         for (var i = 0; i < 3; i++) {
             var row = document.createElement("div");
-            month_cell.appendChild(row);
+            month_box.appendChild(row);
             row.classList.add("months");
             row.classList.add("southern");
             for (var j = 0; j < 4; j++) {
@@ -297,7 +309,7 @@
         document.getElementById("a_" + mode).classList.add("active");
     }
 
-    var southern = false;
+    var southern = {{ is_southern }};
 
     function filter() {
         var table = document.getElementById("table");
@@ -363,6 +375,9 @@
             $('.southern').css('display', 'None');
             $('.northern').css('display', 'inline-flex');
             filter();
+            {% if user.is_authenticated %}
+                changeHemisphere();
+            {% endif %}
         }
     }
 
@@ -372,8 +387,18 @@
             $('.northern').css('display', 'None');
             $('.southern').css('display', 'inline-flex');
             filter();
+            {% if user.is_authenticated %}
+                changeHemisphere();
+            {% endif %}
         }
     }
+    {% if user.is_authenticated %}
+        function changeHemisphere() {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", "/settings?southern=" + southern);
+            xmlhttp.send();
+        }
+    {% endif %}
 
 </script>
 

@@ -144,6 +144,10 @@ table {
     height: 0.5rem;
 }
 
+.month-box {
+    max-width: 300px;
+}
+
 .months {
     width: 100%;
 }

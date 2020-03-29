@@ -6,5 +6,6 @@ urlpatterns = [
     path('', views.homepage, name='index'),
     path('fish.json', views.listFish),
     path('catch', views.changeCaught),
+    path('settings', views.changeSettings),
     path('auth/logout/', views.logout_view, name='logout'),
 ]

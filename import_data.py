@@ -1,3 +1,6 @@
+import csv
+from time import strptime
+
 def timeFromStr(string):
     time = int(string.split(":")[0]) + (12 if string[-2] == 'P' else 0)
     print(time)
