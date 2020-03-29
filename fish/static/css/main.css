@@ -165,11 +165,11 @@ table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_no
 }
 
 td#caught {
-    min-width: 6.75rem;
+    min-width: 7rem;
 }
 
 td#bells {
-    min-width: 5rem;
+    min-width: 7rem;
 }
 
 td#location {
