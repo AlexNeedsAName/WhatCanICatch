@@ -122,7 +122,6 @@ table {
 .tick-container {
     padding: 0;
     width: 2px;
-    /*background-color: CYAN;*/
 }
 
 .tick-container.active {
@@ -174,4 +173,13 @@ td#bells {
 
 td#location {
     min-width: 7rem;
+}
+
+.nowbar {
+    height: 3rem;
+    margin-left: 1px;
+    margin-top: calc(-2.5rem - 1px);
+    border-right: red solid 2px;
+    z-index: 1;
+    position: relative;
 }

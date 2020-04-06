@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     {# Universal Styles here #}
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=11">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css?v=12">
     <script id="data" type="text/json" src="/fish.json"></script>
     <script src="/static/js/sorttable.js"></script>
 </head>
@@ -121,7 +121,8 @@
             console.log(data);
             data.forEach(addRow);
             sorttable.makeSortable(document.getElementById("tbl"));
-            filter();
+            timeHasPassed();
+            setInterval(timeHasPassed, 5000); // Update every 5 seconds
         }
     };
     xmlhttp.open("GET", "/fish.json", true);
@@ -272,6 +273,11 @@
         hours_cell.appendChild(bar);
         bar.className = "row hour-bar";
 
+        var currentTimeIndicator = document.createElement("div");
+        currentTimeIndicator.classList.add("nowbar");
+        hours_cell.appendChild(currentTimeIndicator);
+
+
         for (var i = 0; i < 24; i++) {
             var tick_container = document.createElement("span");
             tick_container.classList.add("tick-container");
@@ -311,10 +317,9 @@
 
     var southern = {{ is_southern }};
 
-    function filter() {
+    function filter(now) {
         var table = document.getElementById("table");
         var tr = table.getElementsByTagName("tr");
-        let now = new Date();
         let cur_month = (now.getMonth() + (southern ? 6 : 0)) % 12;
         let cur_hour = now.getHours();
 
@@ -365,7 +370,7 @@
         if (mode !== newMode) {
             console.log("changing mode from " + mode + " to " + newMode);
             mode = newMode;
-            filter();
+            filter(new Date());
         }
     }
 
@@ -392,6 +397,25 @@
             {% endif %}
         }
     }
+
+    function updateTime(now) {
+        var percent = ((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 864) + '%';
+        console.log("Percent through day: " + percent);
+        $('.nowbar').css('width', percent);
+    }
+
+    var lastHour = 25;
+
+    function timeHasPassed() {
+        let now = new Date();
+        updateTime(now);
+        let hour = now.getHours();
+        if (hour !== lastHour) {
+            filter(now);
+            lastHour = hour;
+        }
+    }
+
     {% if user.is_authenticated %}
         function changeHemisphere() {
             var xmlhttp = new XMLHttpRequest();
